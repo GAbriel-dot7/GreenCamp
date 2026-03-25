@@ -746,6 +746,7 @@ const CATEGORIES = [
   { id:'frango', name:'Frango' },
   { id:'massas', name:'Massas' },
   { id:'suino', name:'Suíno' },
+  { id:'guarnicoes', name:'Guarnições' },
   { id:'carnes', name:'Carnes Nobres' },
   { id:'bebidas', name:'Bebidas' },
   { id:'cervejas', name:'Cervejas' },
@@ -801,13 +802,13 @@ const PRODUCTS = [
   { id:'mignon_val', cat:'porcoes_quentes', name:'Mignon à Valentina', desc:'Iscas de filé mignon cobertas de Catupiry®, acompanhadas de pão.', type:'simple', price:105 },
   { id:'picanha_por', cat:'porcoes_quentes', name:'Picanha (Porção)', desc:'Iscas de picanha, acompanhadas de pão e vinagrete.', type:'simple', price:100 },
   { id:'contra_por', cat:'porcoes_quentes', name:'Contra-Filé Acebolado (Porção)', desc:'Iscas de contra-filé acebolado, acompanhadas de pão e vinagrete.', type:'simple', price:75 },
-  { id:'batata', cat:'porcoes_quentes', name:'Batata Frita', desc:'Batata frita crocante.', type:'configurable', price:40,
-    groups:[
-      { id:'toppings', name:'Adicionais (opcional)', type:'multi', required:false, max:3, options:[
-        { id:'catup', label:'+ Catupiry®', price:18 },
-        { id:'cheddar', label:'+ Cheddar', price:10 },
-        { id:'bacon', label:'+ Bacon', price:10 },
-      ]}
+  { id:'batata', cat:'porcoes_quentes', name:'Batata Frita', desc:'Batata frita crocante. Escolha a versão desejada.', type:'variation',
+    variations:[
+      { id:'simples', label:'Simples', price:40 },
+      { id:'catup', label:'Com Catupiry®', price:58 },
+      { id:'catup_bacon', label:'Com Catupiry® e Bacon', price:62 },
+      { id:'cheddar_bacon', label:'Com Cheddar e Bacon', price:60 },
+      { id:'catup_ched_bacon', label:'Com Catupiry®, Cheddar e Bacon', price:68 },
     ]
   },
   { id:'polenta', cat:'porcoes_quentes', name:'Polenta Frita', desc:'', type:'simple', price:38 },
@@ -1085,6 +1086,34 @@ const PRODUCTS = [
   { id:'vinho_gar', cat:'drinks', name:'Garrafa de Vinho', desc:'Consulte a marca disponível.', type:'simple', price:100 },
   { id:'lambrusco', cat:'drinks', name:'Lambrusco', desc:'Consulte a marca disponível.', type:'simple', price:100 },
 
+  /* GUARNIÇÕES */
+  { id:'guar_grupo1', cat:'guarnicoes', name:'Arroz / Feijão / Vinagrete / Batata Soutê / Legumes', desc:'Escolha uma das opções desta linha.', type:'configurable', price:18,
+    groups:[
+      { id:'g1', name:'Escolha o item', type:'single', required:true, options:[
+        { id:'arroz', label:'Arroz', price:0 },
+        { id:'feijao', label:'Feijão', price:0 },
+        { id:'vinagrete', label:'Vinagrete', price:0 },
+        { id:'bat_soute', label:'Batata Soutê', price:0 },
+        { id:'legumes', label:'Legumes', price:0 },
+      ]}
+    ]
+  },
+  { id:'guar_grupo2', cat:'guarnicoes', name:'Mandioca / Batata Frita / Purê de Batata / Virado de Feijão', desc:'Escolha uma das opções desta linha.', type:'configurable', price:18,
+    groups:[
+      { id:'g2', name:'Escolha o item', type:'single', required:true, options:[
+        { id:'mandioca_g', label:'Mandioca', price:0 },
+        { id:'bat_frita_g', label:'Batata Frita', price:0 },
+        { id:'pure_bat', label:'Purê de Batata', price:0 },
+        { id:'virado', label:'Virado de Feijão', price:0 },
+        { id:'bat_palha', label:'Batata Palha', price:0 },
+      ]}
+    ]
+  },
+  { id:'guarnic_pure_mand', cat:'guarnicoes', name:'Purê de Mandioquinha', desc:'', type:'simple', price:25 },
+  { id:'guarnic_pao', cat:'guarnicoes', name:'Pão / Ovo Frito', desc:'', type:'simple', price:3 },
+  { id:'guarnic_farofa', cat:'guarnicoes', name:'Farofa de Banana', desc:'', type:'simple', price:15 },
+  { id:'guarnic_troca', cat:'guarnicoes', name:'Troca de Item de Prato', desc:'Substituição de acompanhamento incluso no prato.', type:'simple', price:4 },
+
   /* SOBREMESAS */
   { id:'pudim', cat:'sobremesas', name:'Pudim de Leite Condensado', desc:'', type:'simple', price:20 },
   { id:'petit', cat:'sobremesas', name:'Petit Gateau', desc:'', type:'simple', price:35 },
@@ -1123,7 +1152,10 @@ function buildNav() {
     btn.className = 'cat-pill' + (i===0?' active':'');
     btn.textContent = c.name;
     btn.dataset.cat = c.id;
-    btn.onclick = () => scrollToSection(c.id);
+    btn.onclick = () => {
+      const sec = document.getElementById('sec-' + c.id);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
     nav.appendChild(btn);
   });
 }
@@ -1454,26 +1486,26 @@ function sendWhatsapp() {
 /* ═══════════════════════════════════════════
    SCROLL SPY
 ═══════════════════════════════════════════ */
-function scrollToSection(catId) {
-  const el = document.getElementById('sec-' + catId);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
-}
-
 function setupScrollSpy() {
-  const secs = document.querySelectorAll('.section-anchor');
   const pills = document.querySelectorAll('.cat-pill');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const id = e.target.id.replace('sec-','');
-        pills.forEach(p => p.classList.toggle('active', p.dataset.cat===id));
-        // scroll pill into view
-        const activePill = document.querySelector(`.cat-pill[data-cat="${id}"]`);
-        if (activePill) activePill.scrollIntoView({ inline:'center', behavior:'smooth' });
-      }
-    });
-  }, { rootMargin:'-100px 0px -50% 0px' });
-  secs.forEach(s => obs.observe(s));
+
+  function updateActive() {
+    const secs = [...document.querySelectorAll('.section-anchor')];
+    const offset = 140;
+    let active = secs[0];
+    for (const sec of secs) {
+      if (sec.getBoundingClientRect().top <= offset) active = sec;
+      else break;
+    }
+    if (!active) return;
+    const id = active.id.replace('sec-','');
+    pills.forEach(p => p.classList.toggle('active', p.dataset.cat === id));
+    const activePill = document.querySelector(`.cat-pill[data-cat="${id}"]`);
+    if (activePill) activePill.scrollIntoView({ inline:'center', behavior:'smooth', block:'nearest' });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
 }
 
 /* ═══════════════════════════════════════════
