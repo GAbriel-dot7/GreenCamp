@@ -1,12 +1,1497 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenCamp</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greencamp – Cardápio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8892a;
+    --accent2: #e8a940;
+    --text: #f0ede8;
+    --text2: #9a9490;
+    --text3: #6a6460;
+    --green: #2d5a27;
+    --green2: #3d7a35;
+    --danger: #c0392b;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(180deg, #111 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .logo {
+    display: flex;
+    flex-direction: column;
+  }
+  .logo-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .logo-sub {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .cart-btn {
+    position: relative;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s;
+  }
+  .cart-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cart-badge {
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+  }
+  .cart-badge.show { display: flex; }
+
+  /* ── CATEGORY NAV ── */
+  .cat-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 14px;
+    scrollbar-width: none;
+  }
+  .cat-nav::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 7px 16px;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* ── MAIN ── */
+  .main { padding: 0 16px 120px; }
+
+  /* ── SECTION ── */
+  .section { padding-top: 32px; }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .section-line {
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+    margin-bottom: 20px;
+    border-radius: 2px;
+  }
+
+  /* ── PRODUCT CARD ── */
+  .products-grid { display: flex; flex-direction: column; gap: 10px; }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    display: flex;
+    align-items: stretch;
+  }
+  .product-card:hover { border-color: #3a3a3a; transform: translateY(-1px); }
+  .product-card:active { transform: translateY(0); }
+  .product-info { padding: 14px 16px; flex: 1; }
+  .product-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .product-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .product-price-row { display: flex; align-items: center; justify-content: space-between; }
+  .product-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .product-price-from {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 400;
+  }
+  .add-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    color: #000;
+    font-size: 20px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .add-btn:hover { background: var(--accent2); }
+  .product-tag {
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--text3);
+    display: inline-block;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.open { display: flex; }
+
+  /* ── MODAL SHEET ── */
+  .sheet {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    animation: slideUp .3s cubic-bezier(.32,.72,0,1);
+    scrollbar-width: none;
+  }
+  .sheet::-webkit-scrollbar { display: none; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .sheet-drag { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 0; }
+  .sheet-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .sheet-header { padding: 16px 20px 0; position: relative; }
+  .sheet-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 6px;
+    padding-right: 40px;
+  }
+  .sheet-desc { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
+  .sheet-body { padding: 0 20px; }
+
+  /* ── GROUP ── */
+  .group { margin-bottom: 24px; }
+  .group-header { margin-bottom: 12px; }
+  .group-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .group-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .group-required {
+    display: inline-block;
+    background: #2a1a0a;
+    border: 1px solid #5a3a10;
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* ── OPTION ITEM ── */
+  .option-list { display: flex; flex-direction: column; gap: 8px; }
+  .option-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: border-color .15s;
+    gap: 12px;
+  }
+  .option-item:hover { border-color: var(--accent); }
+  .option-item.selected { border-color: var(--accent); background: #1a1200; }
+  .option-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .option-check {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .option-item.selected .option-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .option-item.selected .option-check::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: #000;
+    border-radius: 50%;
+    display: block;
+  }
+  .check-square { border-radius: 5px !important; }
+  .option-item.selected .check-square::after {
+    content: '✓';
+    font-size: 13px;
+    color: #000;
+    background: none;
+    border-radius: 0;
+    width: auto; height: auto;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .option-label { font-size: 14px; font-weight: 500; color: var(--text); }
+  .option-sub { font-size: 12px; color: var(--text3); }
+  .option-price { font-size: 14px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+  .option-price-free { color: var(--text3); font-weight: 400; font-size: 13px; }
+
+  /* ── QTY ── */
+  .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 20px 0 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    width: fit-content;
+    margin: 20px auto 0;
+    overflow: hidden;
+  }
+  .qty-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 22px;
+    width: 48px; height: 48px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+    font-weight: 300;
+  }
+  .qty-btn:hover { background: var(--border); }
+  .qty-num { font-size: 18px; font-weight: 700; width: 36px; text-align: center; }
+
+  /* ── FOOTER BAR ── */
+  .sheet-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    bottom: 0;
+  }
+  .add-to-cart-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 50px;
+    padding: 16px;
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background .2s;
+    letter-spacing: 0.01em;
+  }
+  .add-to-cart-btn:hover { background: var(--accent2); }
+  .add-to-cart-btn:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+  .btn-total { font-size: 18px; }
+  .validation-msg {
+    font-size: 12px;
+    color: #e07040;
+    text-align: center;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* ── CART PANEL ── */
+  .cart-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    display: none;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .cart-overlay.open { display: flex; }
+  .cart-sheet {
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp .3s cubic-bezier(.32,.72,0,1);
+  }
+  .cart-head {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .cart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .cart-items { overflow-y: auto; flex: 1; padding: 16px 20px; scrollbar-width: none; }
+  .cart-items::-webkit-scrollbar { display: none; }
+  .cart-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item-qty {
+    background: var(--accent);
+    color: #000;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 28px;
+    text-align: center;
+  }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .cart-item-detail { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .cart-item-price { font-size: 14px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .cart-item-remove:hover { color: var(--danger); }
+  .cart-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+  .cart-empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* order type */
+  .order-type-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 16px;
+    flex-shrink: 0;
+  }
+  .order-type-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+  }
+  .order-type-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #1a1200;
+  }
+  .order-type-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* obs */
+  .obs-area {
+    padding: 0 20px 16px;
+    flex-shrink: 0;
+  }
+  .obs-label { font-size: 13px; color: var(--text3); margin-bottom: 6px; }
+  .obs-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    resize: none;
+    height: 60px;
+  }
+  .obs-input::placeholder { color: var(--text3); }
+  .obs-input:focus { outline: none; border-color: var(--accent); }
+
+  /* cart footer */
+  .cart-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 20px;
+    flex-shrink: 0;
+  }
+  .cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .cart-total-label { font-size: 15px; color: var(--text2); }
+  .cart-total-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .whatsapp-btn {
+    width: 100%;
+    background: #128C7E;
+    border: none;
+    border-radius: 50px;
+    padding: 16px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background .2s;
+  }
+  .whatsapp-btn:hover { background: #0a7a6e; }
+  .whatsapp-btn:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+  .wpp-icon { font-size: 20px; }
+
+  /* phone input */
+  .phone-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .phone-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+  }
+  .phone-input::placeholder { color: var(--text3); }
+  .phone-input:focus { outline: none; border-color: var(--accent); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: var(--text);
+    opacity: 0;
+    transition: all .3s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── SCROLL indicator for categories ── */
+  .section-anchor { scroll-margin-top: 130px; }
+
+  /* highlight combo */
+  .combo-tag {
+    display: inline-block;
+    background: var(--green);
+    color: #8fda82;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .price-note { font-size: 11px; color: var(--text3); margin-top: 2px; }
+</style>
 </head>
 <body>
-    <h1>Bem-vindo ao GreenCamp!</h1>
-    <p>Este é um simples arquivo HTML de exemplo para o GreenCamp.</p>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <span class="logo-name">Greencamp</span>
+      <span class="logo-sub">Cardápio Digital</span>
+    </div>
+    <button class="cart-btn" onclick="openCart()">
+      <span>🛒</span>
+      <span id="cartLabel">Carrinho</span>
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+  <nav class="cat-nav" id="catNav"></nav>
+</div>
+
+<main class="main" id="main"></main>
+
+<!-- Product Modal -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-drag"></div>
+    <div class="sheet-header">
+      <button class="sheet-close" onclick="closeModal()">✕</button>
+      <div id="sheetTag"></div>
+      <div class="sheet-name" id="sheetName"></div>
+      <div class="sheet-desc" id="sheetDesc"></div>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+    <div class="sheet-footer">
+      <div class="qty-row">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-num" id="qtyNum">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <div style="height:14px"></div>
+      <button class="add-to-cart-btn" id="addBtn" onclick="addToCart()">
+        <span>Adicionar ao pedido</span>
+        <span class="btn-total" id="btnTotal">R$0</span>
+      </button>
+      <div class="validation-msg" id="validMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Panel -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartEvent(event)">
+  <div class="cart-sheet">
+    <div class="cart-head">
+      <div class="cart-title">Meu Pedido</div>
+      <button class="sheet-close" style="position:static" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="order-type-row">
+      <button class="order-type-btn active" id="btnRetirada" onclick="setOrderType('retirada')">
+        <span class="order-type-icon">🏠</span>Retirada
+      </button>
+      <button class="order-type-btn" id="btnEntrega" onclick="setOrderType('entrega')">
+        <span class="order-type-icon">🛵</span>Entrega
+      </button>
+    </div>
+    <div class="obs-area">
+      <div class="obs-label">Observações gerais (opcional)</div>
+      <textarea class="obs-input" id="obsInput" placeholder="Alguma instrução especial para o pedido?"></textarea>
+    </div>
+    <div class="cart-footer">
+      <div class="phone-row">
+        <input class="phone-input" type="tel" id="phoneInput" placeholder="Número do WhatsApp (ex: 11999999999)">
+      </div>
+      <div class="cart-total-row">
+        <span class="cart-total-label">Total</span>
+        <span class="cart-total-val" id="cartTotal">R$0,00</span>
+      </div>
+      <button class="whatsapp-btn" id="wppBtn" onclick="sendWhatsapp()">
+        <span class="wpp-icon">💬</span> Enviar pelo WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA MODEL
+═══════════════════════════════════════════ */
+const CATEGORIES = [
+  { id:'entradas', name:'Entradas' },
+  { id:'saladas', name:'Saladas' },
+  { id:'trios', name:'Trios' },
+  { id:'porcoes_frias', name:'Porções Frias' },
+  { id:'porcoes_quentes', name:'Porções Quentes' },
+  { id:'tilap', name:'Tilápia' },
+  { id:'frutos', name:'Frutos do Mar' },
+  { id:'salm', name:'Salmão' },
+  { id:'robalo', name:'Robalo' },
+  { id:'camarao', name:'Camarão' },
+  { id:'abadejo', name:'Abadejo' },
+  { id:'pacu', name:'Pacu' },
+  { id:'frango', name:'Frango' },
+  { id:'massas', name:'Massas' },
+  { id:'suino', name:'Suíno' },
+  { id:'carnes', name:'Carnes Nobres' },
+  { id:'bebidas', name:'Bebidas' },
+  { id:'cervejas', name:'Cervejas' },
+  { id:'drinks', name:'Drinks' },
+  { id:'sobremesas', name:'Sobremesas' },
+];
+
+// Types: 'simple' | 'variation' | 'configurable' | 'combo'
+const PRODUCTS = [
+  /* ENTRADAS */
+  { id:'casquinha', cat:'entradas', name:'Casquinha de Siri', desc:'Nossa famosa casquinha de siri (por unidade).', type:'simple', price:26 },
+  { id:'couvert', cat:'entradas', name:'Couvert', desc:'Torradas acompanhadas de pasta de ricota com alho e mostarda, patê de tomate seco e antepasto de berinjela.', type:'simple', price:22 },
+
+  /* SALADAS */
+  { id:'sal_simples', cat:'saladas', name:'Salada Simples', desc:'Alface, Tomate, Rúcula e Cebola.', type:'simple', price:32 },
+  { id:'sal_mista', cat:'saladas', name:'Salada Mista', desc:'Alface, Tomate, Rúcula, Azeitona, Cebola e Palmito.', type:'simple', price:55 },
+  { id:'sal_terra', cat:'saladas', name:'Salada Terra Mar', desc:'Alface, Tomate Cereja, Camarões Flambados, Morango e Fios de Provolone.', type:'simple', price:75 },
+
+  /* TRIOS */
+  { id:'trio1', cat:'trios', name:'Trio Greencamp 1', desc:'Picanha, Mandioca e Calabresa Acebolada.', type:'combo', price:158,
+    items:['Picanha','Mandioca','Calabresa Acebolada'] },
+  { id:'trio2', cat:'trios', name:'Trio Greencamp 2', desc:'Tilápia, Torresmo à Pururuca e Batata Frita.', type:'combo', price:105,
+    items:['Tilápia','Torresmo à Pururuca','Batata Frita'] },
+  { id:'trio3', cat:'trios', name:'Trio Greencamp 3', desc:'Mandioca c/ Carne Seca, Contra-Filé Acebolado e Batata Frita.', type:'combo', price:148,
+    items:['Mandioca c/ Carne Seca','Contra-Filé Acebolado','Batata Frita'] },
+  { id:'trio4', cat:'trios', name:'Trio Greencamp 4', desc:'Picanha, Tilápia e Batata Frita.', type:'combo', price:175,
+    items:['Picanha','Tilápia','Batata Frita'] },
+
+  /* PORÇÕES FRIAS */
+  { id:'azeitona', cat:'porcoes_frias', name:'Azeitonas', desc:'', type:'simple', price:25 },
+  { id:'salame', cat:'porcoes_frias', name:'Salame', desc:'', type:'simple', price:35 },
+  { id:'palmito_p', cat:'porcoes_frias', name:'Palmito', desc:'', type:'simple', price:50 },
+  { id:'sashimi', cat:'porcoes_frias', name:'Sashimi Greencamp', desc:'Sashimi de Tilápia (300g).', type:'simple', price:50 },
+
+  /* PORÇÕES QUENTES – PEIXES */
+  { id:'iscas_tilap', cat:'porcoes_quentes', name:'Iscas de Tilápia', desc:'Tiras de filé de tilápia empanadas, acompanhadas de limão e molho rose.', type:'configurable', price:62,
+    groups:[
+      { id:'preparo', name:'Preparo', type:'single', required:true, options:[
+        { id:'normal', label:'Empanada Tradicional', price:0 },
+        { id:'dore', label:'À Dorê (farinha de rosca)', price:3 },
+      ]}
+    ]
+  },
+  { id:'lula', cat:'porcoes_quentes', name:'Lula à Dorê', desc:'Anéis de lula marinados, acompanhados de limão e molho rose.', type:'simple', price:58 },
+  { id:'costelinha_pacu', cat:'porcoes_quentes', name:'Costelinha de Pacu', desc:'Posta de pacu empanada, acompanhada de limão e molho rose.', type:'simple', price:49 },
+  { id:'pacu_se', cat:'porcoes_quentes', name:'Pacú Sem Espinho', desc:'Tiras de filé de pacu sem espinho empanados, acompanhados de molho rose.', type:'simple', price:59 },
+  { id:'cam_empan', cat:'porcoes_quentes', name:'Camarão Empanado', desc:'Camarões empanados e fritos, acompanhados de limão e molho rose.', type:'simple', price:59 },
+  { id:'cam_paul', cat:'porcoes_quentes', name:'Camarão à Paulista', desc:'Camarões flambados ao alho e óleo, acompanhados de limão e molho rose.', type:'simple', price:59 },
+  { id:'file_mig_por', cat:'porcoes_quentes', name:'Iscas de Filé Mignon Acebolado', desc:'Tiras de filé mignon aceboladas, acompanhadas de vinagrete e pão.', type:'simple', price:95 },
+  { id:'provolone_por', cat:'porcoes_quentes', name:'Provolone à Milanesa', desc:'Quadrados de provolone empanados, acompanhados de molho rose.', type:'simple', price:65 },
+  { id:'abadejo_por', cat:'porcoes_quentes', name:'Iscas de Abadejo', desc:'Tiras de filé de abadejo empanadas, acompanhadas de limão e molho rose.', type:'simple', price:105 },
+  { id:'lambari', cat:'porcoes_quentes', name:'Lambari Empanado', desc:'Lambari empanados, acompanhados de limão e molho rose.', type:'simple', price:49 },
+  { id:'mignon_val', cat:'porcoes_quentes', name:'Mignon à Valentina', desc:'Iscas de filé mignon cobertas de Catupiry®, acompanhadas de pão.', type:'simple', price:105 },
+  { id:'picanha_por', cat:'porcoes_quentes', name:'Picanha (Porção)', desc:'Iscas de picanha, acompanhadas de pão e vinagrete.', type:'simple', price:100 },
+  { id:'contra_por', cat:'porcoes_quentes', name:'Contra-Filé Acebolado (Porção)', desc:'Iscas de contra-filé acebolado, acompanhadas de pão e vinagrete.', type:'simple', price:75 },
+  { id:'batata', cat:'porcoes_quentes', name:'Batata Frita', desc:'Batata frita crocante.', type:'configurable', price:40,
+    groups:[
+      { id:'toppings', name:'Adicionais (opcional)', type:'multi', required:false, max:3, options:[
+        { id:'catup', label:'+ Catupiry®', price:18 },
+        { id:'cheddar', label:'+ Cheddar', price:10 },
+        { id:'bacon', label:'+ Bacon', price:10 },
+      ]}
+    ]
+  },
+  { id:'polenta', cat:'porcoes_quentes', name:'Polenta Frita', desc:'', type:'simple', price:38 },
+  { id:'mandioca_cs', cat:'porcoes_quentes', name:'Mandioca Frita c/ Carne Seca', desc:'Mandioca frita coberta com carne seca, acompanhada de molho rose.', type:'simple', price:62 },
+  { id:'mandioca_p', cat:'porcoes_quentes', name:'Mandioca Frita', desc:'', type:'simple', price:40 },
+  { id:'frango_por', cat:'porcoes_quentes', name:'Iscas de Frango Fritas', desc:'', type:'simple', price:62 },
+  { id:'torresmo', cat:'porcoes_quentes', name:'Torresmo à Pururuca', desc:'', type:'simple', price:35 },
+  { id:'calabresa', cat:'porcoes_quentes', name:'Calabresa Acebolada', desc:'', type:'simple', price:43 },
+
+  /* TILÁPIA */
+  { id:'tilap_parm', cat:'tilap', name:'Tilápia à Parmegiana', desc:'Filé de tilápia empanado e frito com molho de tomate e mussarela, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:55 },
+      { id:'2p', label:'2 Pessoas', price:100 },
+    ]
+  },
+  { id:'tilap_gc', cat:'tilap', name:'Tilápia Greencamp', desc:'Iscas de filé de tilápia empanado e frito, acompanhado de arroz branco, batata doce coradas e salada simples.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:105 }]
+  },
+  { id:'tilap_frito', cat:'tilap', name:'Filé de Tilápia Frito Inteiro', desc:'Filé de tilápia inteiro empanado e frito, acompanhado de arroz branco, vinagrete e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:55 },
+      { id:'2p', label:'2 Pessoas', price:100 },
+    ]
+  },
+  { id:'tilap_cam', cat:'tilap', name:'Tilápia ao Molho Camarão', desc:'Filé de tilápia empanado e frito, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:115 }]
+  },
+  { id:'tilap_grel', cat:'tilap', name:'Filé de Tilápia Grelhada', desc:'Filé de tilápia grelhado, acompanhado de arroz branco e batata soutê.', type:'configurable', price:55,
+    groups:[
+      { id:'catupiry', name:'Adicional', type:'single', required:true, options:[
+        { id:'sem', label:'Sem adicionais', price:0 },
+        { id:'com_cat', label:'+ Catupiry® (c/ vinagrete e batata frita)', price:10 },
+      ]}
+    ]
+  },
+  { id:'moqueca_tilap', cat:'tilap', name:'Moqueca de Tilápia', desc:'Moqueca de filé de tilápia com pimentões, camarões, azeite de dendê e leite de coco. Acompanha arroz branco. ⚠️ Confirmar tempo de preparo.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:165 }]
+  },
+
+  /* FRUTOS DO MAR */
+  { id:'bacalhau', cat:'frutos', name:'Bacalhau à Portuguesa', desc:'Lombo de bacalhau cozido com batata, pimentões, ovos, azeitonas pretas, acompanhado de arroz branco. ⚠️ Confirmar tempo de preparo.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:200 }]
+  },
+
+  /* SALMÃO */
+  { id:'salm_grel', cat:'salm', name:'Salmão Grelhado', desc:'Filé de salmão grelhado, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:69 },
+      { id:'2p', label:'2 Pessoas', price:130 },
+    ]
+  },
+  { id:'salm_marac', cat:'salm', name:'Salmão ao Molho Maracujá', desc:'Filé de salmão grelhado com molho maracujá, acompanhado de arroz branco e tomate recheado com Catupiry®.', type:'variation',
+    variations:[{ id:'1p', label:'1 Pessoa', price:75 }]
+  },
+  { id:'salm_cam', cat:'salm', name:'Salmão ao Molho de Camarão', desc:'Filé de salmão grelhado com molho de camarões, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:75 },
+      { id:'2p', label:'2 Pessoas', price:139 },
+    ]
+  },
+  { id:'salm_risoto', cat:'salm', name:'Salmão c/ Risoto de Camarão e Limão Siciliano', desc:'Filé de salmão grelhado acompanhado de risoto de camarões finalizado com limão siciliano e batata rústica.', type:'variation',
+    variations:[{ id:'1p', label:'1 Pessoa', price:89 }]
+  },
+
+  /* ROBALO */
+  { id:'rob_grel', cat:'robalo', name:'Robalo Grelhado', desc:'Filé de robalo grelhado, acompanhado de purê de mandioquinha, arroz branco e marinada de tomate cereja.', type:'variation',
+    variations:[{ id:'1p', label:'1 Pessoa', price:83 }]
+  },
+  { id:'rob_cam', cat:'robalo', name:'Robalo ao Molho de Camarão', desc:'Filé de robalo grelhado com molho de camarão, acompanhado de arroz branco e purê de mandioquinha.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:85 },
+      { id:'2p', label:'2 Pessoas', price:159 },
+    ]
+  },
+
+  /* CAMARÃO */
+  { id:'cam_jack', cat:'camarao', name:'Camarão San Jack', desc:'Camarão San Jack recheado com Catupiry®, empanado e frito, acompanhado de arroz branco e batata soutê.', type:'configurable', price:105,
+    groups:[
+      { id:'cascata', name:'Versão', type:'single', required:true, options:[
+        { id:'normal', label:'Individual (1 pessoa)', price:0 },
+        { id:'cascata', label:'Na Cascata – 2 pessoas (c/ Catupiry®)', price:90 },
+      ]}
+    ]
+  },
+  { id:'cam_catup', cat:'camarao', name:'Camarão ao Catupiry Gratinado ao Provolone', desc:'Camarão coberto de Catupiry® e provolone gratinado, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:190 }]
+  },
+  { id:'cam_coco', cat:'camarao', name:'Camarão no Coco', desc:'Camarão ao molho de leite de coco, azeite de dendê e Catupiry®, servido em um coco. Acompanha arroz branco e batata rústica.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:180 }]
+  },
+  { id:'strog_cam', cat:'camarao', name:'Strogonoff de Camarão', desc:'Strogonoff de camarão, acompanhado de arroz branco e batata palha.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:140 }]
+  },
+
+  /* ABADEJO */
+  { id:'abad_belle', cat:'abadejo', name:'Abadejo à Belle Muniére', desc:'Filé de abadejo grelhado com molho de camarão, cogumelos e alcaparras, acompanhado de arroz branco e batata soutê.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:95 },
+      { id:'2p', label:'2 Pessoas', price:179 },
+    ]
+  },
+  { id:'abad_grel', cat:'abadejo', name:'Abadejo Grelhado', desc:'Filé de abadejo grelhado, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:85 },
+      { id:'2p', label:'2 Pessoas', price:159 },
+    ]
+  },
+  { id:'abad_parm', cat:'abadejo', name:'Abadejo à Parmegiana', desc:'Filé de abadejo empanado e frito com molho de tomate e mussarela, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:93 },
+      { id:'2p', label:'2 Pessoas', price:179 },
+    ]
+  },
+  { id:'moqueca_abad', cat:'abadejo', name:'Moqueca de Abadejo', desc:'Moqueca de filé de abadejo com pimentões, camarões, azeite de dendê e leite de coco. ⚠️ Confirmar tempo de preparo.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:200 }]
+  },
+
+  /* PACU */
+  { id:'pacu_frito', cat:'pacu', name:'Pacu Frito Inteiro Sem Espinho', desc:'Banda de pacu sem espinho empanada e frita inteira, acompanhada de arroz branco, pirão e farofa de banana.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:135 }]
+  },
+
+  /* FRANGO */
+  { id:'frango_grel', cat:'frango', name:'Frango Grelhado', desc:'Filé de frango grelhado, acompanhado de arroz branco e batata frita.', type:'simple', price:42 },
+  { id:'frango_parm', cat:'frango', name:'Frango à Parmegiana', desc:'Filé de frango empanado e frito com molho de tomate e mussarela, acompanhado de arroz branco e batata frita.', type:'simple', price:49 },
+
+  /* MASSAS */
+  { id:'espaguete', cat:'massas', name:'Espaguete à Bolonhesa', desc:'Espaguete ao molho bolonhesa.', type:'simple', price:45 },
+  { id:'caroline', cat:'massas', name:'Caroline', desc:'Penne ao molho branco com rúcula, tomate seco e provolone.', type:'simple', price:59 },
+
+  /* SUÍNO */
+  { id:'costelinha_bbq', cat:'suino', name:'Costelinha ao Molho Barbecue', desc:'Costelinha suína assada coberta de molho barbecue, acompanhada de arroz branco e batatas coradas.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:110 }]
+  },
+
+  /* CARNES NOBRES */
+  { id:'pic_grel', cat:'carnes', name:'Picanha Grelhada', desc:'Picanha grelhada, acompanhada de arroz branco, batata frita e vinagrete.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:75 },
+      { id:'2p', label:'2 Pessoas', price:140 },
+    ]
+  },
+  { id:'pic_gc', cat:'carnes', name:'Picanha Greencamp', desc:'Picanha grelhada, acompanhada de arroz branco, mandioca frita, virado de feijão e vinagrete.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:79 },
+      { id:'2p', label:'2 Pessoas', price:149 },
+    ]
+  },
+  { id:'pic_esp', cat:'carnes', name:'Picanha Especial', desc:'Picanha grelhada servida na chapa, acompanhada de arroz branco, feijão, farofa e salada mista.', type:'variation',
+    variations:[
+      { id:'2p', label:'2 Pessoas', price:165 },
+      { id:'4p', label:'4 Pessoas', price:295 },
+    ]
+  },
+  { id:'pic_min', cat:'carnes', name:'Picanha Mineira', desc:'Picanha grelhada servida na chapa, acompanhada de arroz branco, torresmo, farofa, batata frita e vinagrete.', type:'variation',
+    variations:[
+      { id:'2p', label:'2 Pessoas', price:149 },
+      { id:'4p', label:'4 Pessoas', price:280 },
+    ]
+  },
+  { id:'file_parm', cat:'carnes', name:'Parmegiana de Filé Mignon', desc:'Filé mignon empanado e frito com molho de tomate e mussarela, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:65 },
+      { id:'2p', label:'2 Pessoas', price:120 },
+    ]
+  },
+  { id:'file_moraes', cat:'carnes', name:'Filé à Moraes', desc:'Filé mignon grelhado com torras de alho, rúcula e tomate seco, acompanhado de arroz branco e batata frita.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:120 }]
+  },
+  { id:'file_gorg', cat:'carnes', name:'Filé Mignon ao Molho Gorgonzola', desc:'Filé mignon grelhado coberto por molho a base de gorgonzola, acompanhado de arroz branco e batata soutê.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:130 }]
+  },
+  { id:'file_grel', cat:'carnes', name:'Filé Mignon Grelhado', desc:'Filé mignon grelhado, acompanhado de arroz branco, batata frita e vinagrete.', type:'simple', price:63 },
+  { id:'strog_file', cat:'carnes', name:'Strogonoff de Filé Mignon', desc:'Filé mignon flambado no conhaque com mostarda e champignon, acompanhado de arroz e batata palha.', type:'variation',
+    variations:[{ id:'2p', label:'2 Pessoas', price:125 }]
+  },
+  { id:'risoto_file', cat:'carnes', name:'Risoto de Filé Mignon', desc:'Risoto cremoso preparado com filé mignon e arroz arbóreo, finalizado com provolone.', type:'variation',
+    variations:[
+      { id:'1p', label:'1 Pessoa', price:69 },
+      { id:'2p', label:'2 Pessoas', price:130 },
+    ]
+  },
+  { id:'contra_prato', cat:'carnes', name:'Contra Filé Acebolado', desc:'Contra filé grelhado e acebolado, acompanhado de arroz branco, feijão e batata frita.', type:'simple', price:59 },
+
+  /* BEBIDAS */
+  { id:'refrig', cat:'bebidas', name:'Refrigerante', desc:'', type:'simple', price:9 },
+  { id:'h2oh', cat:'bebidas', name:'H2OH', desc:'', type:'simple', price:10 },
+  { id:'tonica', cat:'bebidas', name:'Água Tônica', desc:'', type:'simple', price:9 },
+  { id:'agua_s', cat:'bebidas', name:'Água sem Gás', desc:'', type:'simple', price:5 },
+  { id:'agua_c', cat:'bebidas', name:'Água com Gás', desc:'', type:'simple', price:6.50 },
+  { id:'energetico', cat:'bebidas', name:'Energético', desc:'', type:'simple', price:20 },
+  { id:'suco_nat', cat:'bebidas', name:'Suco Natural', desc:'Laranja ou Limão.', type:'simple', price:12 },
+  { id:'limonada', cat:'bebidas', name:'Limonada Suíça', desc:'', type:'simple', price:20 },
+  { id:'suco_polpa', cat:'bebidas', name:'Suco de Polpa', desc:'Abacaxi, Abacaxi c/ Hortelã, Uva, Maracujá, Morango, Acerola, Frutas Vermelhas ou Caju.', type:'configurable', price:12,
+    groups:[
+      { id:'sabor_suco', name:'Escolha o sabor', type:'single', required:true, options:[
+        { id:'abacaxi', label:'Abacaxi', price:0 },
+        { id:'abacaxi_hort', label:'Abacaxi c/ Hortelã', price:0 },
+        { id:'uva', label:'Uva', price:0 },
+        { id:'marac', label:'Maracujá', price:0 },
+        { id:'morang', label:'Morango', price:0 },
+        { id:'acerola', label:'Acerola', price:0 },
+        { id:'frutas_v', label:'Frutas Vermelhas', price:0 },
+        { id:'caju', label:'Caju', price:0 },
+      ]},
+      { id:'leite', name:'Adicionais', type:'multi', required:false, options:[
+        { id:'leite', label:'+ Leite', price:6 },
+      ]}
+    ]
+  },
+  { id:'soda_it', cat:'bebidas', name:'Soda Italiana', desc:'Consulte disponibilidade de sabores.', type:'configurable', price:20,
+    groups:[
+      { id:'sabor_soda', name:'Escolha o sabor', type:'single', required:true, options:[
+        { id:'maca', label:'Maçã Verde', price:0 },
+        { id:'lim_sic', label:'Limão Siciliano', price:0 },
+        { id:'morang_s', label:'Morango', price:0 },
+        { id:'marac_s', label:'Maracujá', price:0 },
+        { id:'tangerin', label:'Tangerina', price:0 },
+      ]}
+    ]
+  },
+  { id:'cafe', cat:'bebidas', name:'Café Expresso', desc:'', type:'simple', price:8 },
+
+  /* CERVEJAS */
+  { id:'chopp', cat:'cervejas', name:'Chopp Claro', desc:'300ml', type:'simple', price:12 },
+  { id:'hein600', cat:'cervejas', name:'Heineken 600ml', desc:'', type:'simple', price:18 },
+  { id:'orig600', cat:'cervejas', name:'Original 600ml', desc:'', type:'simple', price:17 },
+  { id:'brahma', cat:'cervejas', name:'Brahma 600ml', desc:'', type:'simple', price:14 },
+  { id:'skol', cat:'cervejas', name:'Skol 600ml', desc:'', type:'simple', price:14 },
+  { id:'hein_ln', cat:'cervejas', name:'Heineken Long Neck', desc:'', type:'simple', price:13 },
+  { id:'hein_lata', cat:'cervejas', name:'Heineken Lata', desc:'', type:'simple', price:10 },
+  { id:'malz', cat:'cervejas', name:'Malzbier Lata', desc:'', type:'simple', price:10 },
+
+  /* DRINKS */
+  { id:'caipirinha', cat:'drinks', name:'Caipirinha', desc:'Escolha a base e a fruta.', type:'configurable', price:26,
+    groups:[
+      { id:'base_caip', name:'Base da Caipirinha', type:'single', required:true, options:[
+        { id:'pinga', label:'Pinga', price:0 },
+        { id:'vinho_c', label:'Vinho', price:0 },
+        { id:'sake', label:'Saquê', price:4 },
+        { id:'vodka_c', label:'Vodka Smirnoff', price:4 },
+      ]},
+      { id:'fruta_caip', name:'Fruta', type:'single', required:true, options:[
+        { id:'limao_c', label:'Limão', price:0 },
+        { id:'morang_c', label:'Morango', price:0 },
+        { id:'marac_c', label:'Maracujá', price:0 },
+        { id:'kiwi_c', label:'Kiwi', price:0 },
+        { id:'uva_c', label:'Uva', price:0 },
+        { id:'fv_c', label:'Frutas Vermelhas', price:0 },
+      ]}
+    ]
+  },
+  { id:'coquete_frutas', cat:'drinks', name:'Coquetel de Frutas com Álcool', desc:'', type:'simple', price:28 },
+  { id:'coquete_sa', cat:'drinks', name:'Coquetel de Frutas Sem Álcool', desc:'', type:'simple', price:24 },
+  { id:'coq_morang', cat:'drinks', name:'Coquetel de Morango', desc:'Leite condensado e vodka.', type:'simple', price:32 },
+  { id:'coq_marac', cat:'drinks', name:'Coquetel de Maracujá', desc:'Leite condensado e vodka.', type:'simple', price:32 },
+  { id:'mojito', cat:'drinks', name:'Mojito', desc:'Rum branco, hortelã, limão e açúcar.', type:'simple', price:25 },
+  { id:'sex_beach', cat:'drinks', name:'Sex on the Beach', desc:'Groselha, suco de laranja e vodka.', type:'simple', price:28 },
+  { id:'marguerita', cat:'drinks', name:'Marguerita', desc:'', type:'simple', price:28 },
+  { id:'cuba', cat:'drinks', name:'Cuba', desc:'', type:'simple', price:28 },
+  { id:'espanhola', cat:'drinks', name:'Espanhola', desc:'', type:'simple', price:32 },
+  { id:'gin_trop', cat:'drinks', name:'Gin Tropical', desc:'', type:'simple', price:40 },
+  { id:'gin_ton', cat:'drinks', name:'Gin Tônica', desc:'', type:'simple', price:34 },
+  { id:'vodka_dose', cat:'drinks', name:'Vodka Smirnoff (Dose)', desc:'', type:'simple', price:20 },
+  { id:'campari', cat:'drinks', name:'Campari (Dose)', desc:'', type:'simple', price:20 },
+  { id:'jager', cat:'drinks', name:'Jagermeister (Dose)', desc:'', type:'simple', price:30 },
+  { id:'licor43', cat:'drinks', name:'Licor 43 (Dose)', desc:'', type:'simple', price:30 },
+  { id:'tequila', cat:'drinks', name:'Tequila (Dose)', desc:'', type:'simple', price:25 },
+  { id:'cachaca', cat:'drinks', name:'Cachaça (Dose)', desc:'', type:'simple', price:10 },
+  { id:'jw_black', cat:'drinks', name:'Johnnie Walker Black Label (Dose)', desc:'Premium', type:'simple', price:30 },
+  { id:'jack', cat:'drinks', name:'Jack Daniel\'s (Dose)', desc:'', type:'simple', price:30 },
+  { id:'jw_red', cat:'drinks', name:'Johnnie Walker Red Label (Dose)', desc:'', type:'simple', price:25 },
+  { id:'vinho_taca', cat:'drinks', name:'Taça de Vinho', desc:'Pérgola 200ml', type:'simple', price:25 },
+  { id:'vinho_gar', cat:'drinks', name:'Garrafa de Vinho', desc:'Consulte a marca disponível.', type:'simple', price:100 },
+  { id:'lambrusco', cat:'drinks', name:'Lambrusco', desc:'Consulte a marca disponível.', type:'simple', price:100 },
+
+  /* SOBREMESAS */
+  { id:'pudim', cat:'sobremesas', name:'Pudim de Leite Condensado', desc:'', type:'simple', price:20 },
+  { id:'petit', cat:'sobremesas', name:'Petit Gateau', desc:'', type:'simple', price:35 },
+  { id:'sorvete', cat:'sobremesas', name:'Taça de Sorvete', desc:'', type:'simple', price:20 },
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let cart = [];
+let currentProduct = null;
+let currentQty = 1;
+let currentSelections = {}; // groupId -> [optionId]
+let orderType = 'retirada';
+
+/* ═══════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+function getMinPrice(p) {
+  if (p.type === 'simple' || p.type === 'combo') return p.price;
+  if (p.type === 'variation') return Math.min(...p.variations.map(v=>v.price));
+  if (p.type === 'configurable') return p.price;
+  return 0;
+}
+function hasMultiplePrices(p) {
+  if (p.type === 'variation' && p.variations.length > 1) return true;
+  return false;
+}
+
+function fmt(n) { return 'R$' + n.toFixed(2).replace('.',','); }
+
+function buildNav() {
+  const nav = document.getElementById('catNav');
+  CATEGORIES.forEach((c,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-pill' + (i===0?' active':'');
+    btn.textContent = c.name;
+    btn.dataset.cat = c.id;
+    btn.onclick = () => scrollToSection(c.id);
+    nav.appendChild(btn);
+  });
+}
+
+function buildSections() {
+  const main = document.getElementById('main');
+  CATEGORIES.forEach(cat => {
+    const prods = PRODUCTS.filter(p => p.cat === cat.id);
+    if (!prods.length) return;
+    const sec = document.createElement('div');
+    sec.className = 'section section-anchor';
+    sec.id = 'sec-' + cat.id;
+    sec.innerHTML = `<div class="section-title">${cat.name}</div><div class="section-line"></div><div class="products-grid" id="grid-${cat.id}"></div>`;
+    main.appendChild(sec);
+    const grid = sec.querySelector('.products-grid');
+    prods.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      const min = getMinPrice(p);
+      const from = hasMultiplePrices(p) ? '<span class="product-price-from">a partir de </span>' : '';
+      let tag = '';
+      if (p.type === 'combo') tag = `<div class="combo-tag">Combo</div>`;
+      card.innerHTML = `
+        <div class="product-info">
+          ${tag}
+          <div class="product-name">${p.name}</div>
+          ${p.desc ? `<div class="product-desc">${p.desc}</div>` : ''}
+          <div class="product-price-row">
+            <div class="product-price">${from}${fmt(min)}</div>
+            <button class="add-btn" title="Adicionar">+</button>
+          </div>
+        </div>`;
+      card.addEventListener('click', () => openModal(p));
+      grid.appendChild(card);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function openModal(p) {
+  currentProduct = p;
+  currentQty = 1;
+  currentSelections = {};
+
+  // set defaults for variation (first)
+  if (p.type === 'variation') {
+    currentSelections['__variation'] = [p.variations[0].id];
+  }
+
+  document.getElementById('sheetName').textContent = p.name;
+  document.getElementById('sheetDesc').textContent = p.desc || '';
+  const tagEl = document.getElementById('sheetTag');
+  tagEl.innerHTML = p.type === 'combo' ? '<div class="combo-tag">Combo</div>' : '';
+
+  const body = document.getElementById('sheetBody');
+  body.innerHTML = '';
+
+  // VARIATION group
+  if (p.type === 'variation') {
+    const g = buildGroup({
+      id:'__variation', name:'Tamanho / Porção', type:'single', required:true,
+      options: p.variations.map(v=>({ id:v.id, label:v.label, price:v.price, priceBase:true }))
+    });
+    body.appendChild(g);
+  }
+
+  // CONFIGURABLE groups
+  if (p.type === 'configurable' && p.groups) {
+    p.groups.forEach(grp => body.appendChild(buildGroup(grp)));
+  }
+
+  // COMBO items
+  if (p.type === 'combo') {
+    const div = document.createElement('div');
+    div.className = 'group';
+    div.innerHTML = `<div class="group-header"><div class="group-title">Itens inclusos</div></div>
+      <div class="option-list">${p.items.map(it=>`
+        <div class="option-item" style="cursor:default">
+          <div class="option-left"><div class="option-label">✓ ${it}</div></div>
+        </div>`).join('')}</div>`;
+    body.appendChild(div);
+  }
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateTotal();
+  document.getElementById('validMsg').textContent = '';
+}
+
+function buildGroup(grp) {
+  if (!currentSelections[grp.id]) currentSelections[grp.id] = [];
+  // default first for required single
+  if (grp.required && grp.type === 'single' && !currentSelections[grp.id].length) {
+    currentSelections[grp.id] = [grp.options[0].id];
+  }
+
+  const div = document.createElement('div');
+  div.className = 'group';
+  const sub = grp.required ? '' : '<div class="group-subtitle">Opcional</div>';
+  const maxNote = (grp.type==='multi' && grp.max) ? `<div class="group-subtitle">Escolha até ${grp.max}</div>` : '';
+  div.innerHTML = `<div class="group-header">
+    <div class="group-title">${grp.name}</div>
+    ${sub}${maxNote}
+    ${grp.required ? '<div class="group-required">Obrigatório</div>' : ''}
+  </div>
+  <div class="option-list" id="opts-${grp.id}"></div>`;
+
+  const list = div.querySelector(`#opts-${grp.id}`);
+  grp.options.forEach(opt => {
+    const item = document.createElement('div');
+    item.className = 'option-item' + (currentSelections[grp.id].includes(opt.id) ? ' selected' : '');
+    const isCheckbox = grp.type === 'multi';
+    const checkClass = isCheckbox ? 'option-check check-square' : 'option-check';
+    // price display
+    let priceLabel = '';
+    if (opt.priceBase) priceLabel = `<span class="option-price">${fmt(opt.price)}</span>`;
+    else if (opt.price > 0) priceLabel = `<span class="option-price">+${fmt(opt.price)}</span>`;
+    else if (opt.price === 0 && !opt.priceBase) priceLabel = `<span class="option-price-free">Incluso</span>`;
+
+    item.innerHTML = `
+      <div class="option-left">
+        <div class="${checkClass}"></div>
+        <div>
+          <div class="option-label">${opt.label}</div>
+          ${opt.sub ? `<div class="option-sub">${opt.sub}</div>` : ''}
+        </div>
+      </div>
+      ${priceLabel}`;
+    item.onclick = () => selectOption(grp, opt, item, list);
+    list.appendChild(item);
+  });
+  return div;
+}
+
+function selectOption(grp, opt, itemEl, list) {
+  if (grp.type === 'single') {
+    currentSelections[grp.id] = [opt.id];
+    list.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+    itemEl.classList.add('selected');
+  } else {
+    const sel = currentSelections[grp.id] || [];
+    const idx = sel.indexOf(opt.id);
+    if (idx >= 0) {
+      sel.splice(idx, 1);
+      itemEl.classList.remove('selected');
+    } else {
+      if (grp.max && sel.length >= grp.max) { showToast(`Máximo de ${grp.max} opções`); return; }
+      sel.push(opt.id);
+      itemEl.classList.add('selected');
+    }
+    currentSelections[grp.id] = sel;
+  }
+  updateTotal();
+}
+
+function calcProductPrice() {
+  const p = currentProduct;
+  let base = p.price || 0;
+
+  if (p.type === 'variation') {
+    const selVar = currentSelections['__variation']?.[0];
+    if (selVar) { const v = p.variations.find(v=>v.id===selVar); if (v) base = v.price; }
+  }
+
+  if (p.type === 'configurable' && p.groups) {
+    p.groups.forEach(grp => {
+      (currentSelections[grp.id]||[]).forEach(oid => {
+        const opt = grp.options.find(o=>o.id===oid);
+        if (opt && opt.price && !opt.priceBase) base += opt.price;
+        if (opt && opt.priceBase) base = opt.price; // variation-as-configurable
+      });
+    });
+  }
+
+  return base * currentQty;
+}
+
+function updateTotal() {
+  const total = calcProductPrice();
+  document.getElementById('btnTotal').textContent = fmt(total);
+  document.getElementById('qtyNum').textContent = currentQty;
+}
+
+function changeQty(delta) {
+  currentQty = Math.max(1, currentQty + delta);
+  updateTotal();
+}
+
+function validateSelections() {
+  const p = currentProduct;
+  if (p.type === 'variation') {
+    if (!currentSelections['__variation']?.length) return 'Escolha o tamanho/porção.';
+  }
+  if (p.type === 'configurable' && p.groups) {
+    for (const grp of p.groups) {
+      if (grp.required && (!currentSelections[grp.id] || !currentSelections[grp.id].length)) {
+        return `Escolha: ${grp.name}`;
+      }
+    }
+  }
+  return null;
+}
+
+function addToCart() {
+  const err = validateSelections();
+  if (err) { document.getElementById('validMsg').textContent = err; return; }
+  document.getElementById('validMsg').textContent = '';
+
+  const p = currentProduct;
+  const price = calcProductPrice() / currentQty;
+
+  // build detail string
+  let details = [];
+  if (p.type === 'variation') {
+    const v = p.variations.find(v=>v.id===currentSelections['__variation']?.[0]);
+    if (v) details.push(v.label);
+  }
+  if (p.type === 'configurable' && p.groups) {
+    p.groups.forEach(grp => {
+      const sel = currentSelections[grp.id]||[];
+      sel.forEach(oid => {
+        const opt = grp.options.find(o=>o.id===oid);
+        if (opt) details.push(opt.label);
+      });
+    });
+  }
+  if (p.type === 'combo') details = p.items.slice();
+
+  cart.push({ id: Date.now(), product: p, qty: currentQty, unitPrice: price, details });
+  updateCartUI();
+  closeModal();
+  showToast('Adicionado ao pedido ✓');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ═══════════════════════════════════════════
+   CART
+═══════════════════════════════════════════ */
+function updateCartUI() {
+  const badge = document.getElementById('cartBadge');
+  const total = cart.reduce((s,i)=>s+i.unitPrice*i.qty,0);
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  if (count > 0) { badge.textContent = count; badge.classList.add('show'); }
+  else { badge.classList.remove('show'); }
+  document.getElementById('cartLabel').textContent = count > 0 ? fmt(total) : 'Carrinho';
+}
+
+function openCart() {
+  renderCartItems();
+  document.getElementById('cartOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeCartEvent(e) {
+  if (e.target === document.getElementById('cartOverlay')) closeCart();
+}
+
+function renderCartItems() {
+  const el = document.getElementById('cartItems');
+  const total = cart.reduce((s,i)=>s+i.unitPrice*i.qty,0);
+  document.getElementById('cartTotal').textContent = fmt(total);
+
+  if (!cart.length) {
+    el.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div>Seu carrinho está vazio</div></div>`;
+    return;
+  }
+  el.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-qty">${item.qty}x</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.product.name}</div>
+        ${item.details.length ? `<div class="cart-item-detail">${item.details.join(' · ')}</div>` : ''}
+      </div>
+      <div class="cart-item-price">${fmt(item.unitPrice * item.qty)}</div>
+      <button class="cart-item-remove" onclick="removeCartItem(${item.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function removeCartItem(id) {
+  cart = cart.filter(i=>i.id!==id);
+  updateCartUI();
+  renderCartItems();
+}
+
+function setOrderType(type) {
+  orderType = type;
+  document.getElementById('btnRetirada').classList.toggle('active', type==='retirada');
+  document.getElementById('btnEntrega').classList.toggle('active', type==='entrega');
+}
+
+function sendWhatsapp() {
+  if (!cart.length) { showToast('Adicione itens ao pedido'); return; }
+  const phone = document.getElementById('phoneInput').value.replace(/\D/g,'');
+  const obs = document.getElementById('obsInput').value.trim();
+
+  let msg = `🍽️ *PEDIDO – Greencamp*\n\n`;
+  msg += `📦 *Tipo:* ${orderType === 'retirada' ? 'Retirada' : 'Entrega'}\n\n`;
+  msg += `*Itens:*\n`;
+  cart.forEach(item => {
+    msg += `▸ ${item.qty}x ${item.product.name}`;
+    if (item.details.length) msg += ` (${item.details.join(', ')})`;
+    msg += ` – ${fmt(item.unitPrice * item.qty)}\n`;
+  });
+  const total = cart.reduce((s,i)=>s+i.unitPrice*i.qty,0);
+  msg += `\n💰 *Total: ${fmt(total)}*`;
+  if (obs) msg += `\n\n📝 *Obs:* ${obs}`;
+
+  const encoded = encodeURIComponent(msg);
+  const url = phone
+    ? `https://wa.me/55${phone}?text=${encoded}`
+    : `https://wa.me/?text=${encoded}`;
+  window.open(url, '_blank');
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL SPY
+═══════════════════════════════════════════ */
+function scrollToSection(catId) {
+  const el = document.getElementById('sec-' + catId);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+function setupScrollSpy() {
+  const secs = document.querySelectorAll('.section-anchor');
+  const pills = document.querySelectorAll('.cat-pill');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id.replace('sec-','');
+        pills.forEach(p => p.classList.toggle('active', p.dataset.cat===id));
+        // scroll pill into view
+        const activePill = document.querySelector(`.cat-pill[data-cat="${id}"]`);
+        if (activePill) activePill.scrollIntoView({ inline:'center', behavior:'smooth' });
+      }
+    });
+  }, { rootMargin:'-100px 0px -50% 0px' });
+  secs.forEach(s => obs.observe(s));
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+buildNav();
+buildSections();
+setupScrollSpy();
+</script>
 </body>
 </html>
