@@ -4,11 +4,10 @@
 - Projeto: Green Camp
 - Data base: 2026-04-03
 - Smoke check padrao: PASS (sem FAIL)
-- Smoke check estrito: FAIL (faltam credenciais de producao no runtimeConfig)
+- Smoke check estrito: PASS
 
 ## Bloqueadores atuais
-1. `src/shared/runtimeConfig.js` ainda sem `GREENCAMP_SUPABASE_URL` de producao.
-2. `src/shared/runtimeConfig.js` ainda sem `GREENCAMP_SUPABASE_ANON_KEY` de producao.
+- Nenhum bloqueador tecnico detectado no smoke check atual.
 
 ## Gatilho objetivo para deploy
 Faça o deploy quando TODOS os itens abaixo estiverem concluídos:
