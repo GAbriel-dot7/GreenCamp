@@ -1,0 +1,75 @@
+PLANO GREEN CAMP
+
+Objetivo:
+Transformar o cardápio atual em um sistema com leitura de dados do banco, painel ADM, salvamento de pedidos e texto pronto para impressora térmica.
+
+Registro de passos concluídos:
+Passo 1 - Base visual do cardápio revisada.
+Resultado: tipografia, cores, espaçamento e ícones refinados no cardápio atual.
+
+Passo 2 - Fluxo de pedido estruturado.
+Resultado: o cardápio agora salva o pedido, gera o texto do WhatsApp e também gera o texto da impressora térmica.
+
+Passo 3 - Base organizada em arquivos separados.
+Resultado: criados arquivos para configuração compartilhada, formatação de pedido e armazenamento local/banco.
+
+Passo 4 - Painel ADM inicial criado.
+Resultado: página administrativa com lista de pedidos, filtros por status, troca de status e campo para copiar o texto da impressora.
+
+Passo 5 - Base de banco preparada.
+Resultado: schema Supabase criado com restaurantes, categorias, produtos, grupos, opções, pedidos, histórico e usuários ADM.
+
+Passo 6 - Integração inicial com Supabase.
+Resultado: cliente Supabase criado e o salvamento de pedidos já tenta usar banco quando houver configuração, com fallback local.
+
+Passo 7 - Cardápio dinâmico iniciado.
+Resultado: o cardápio agora tenta carregar categorias e produtos do banco; se o banco não responder, ele usa a base local atual sem quebrar.
+
+Passo 8 - CRUD local do cardápio iniciado.
+Resultado: o admin agora tem uma aba para editar categorias e produtos em armazenamento local, e o cardápio passa a ler esse catálogo persistido antes do fallback estático.
+
+Passo 9 - Login do admin iniciado.
+Resultado: o painel administrativo agora tem entrada com sessão local ou Supabase, e o cardápio reage às alterações do catálogo sem precisar recarregar manualmente.
+
+Passo 10 - Revisão técnica completa dos arquivos.
+Resultado: corrigidos problemas de escopo do carregamento dinâmico do cardápio, atualização do scroll spy após rebuild e leitura de pedidos com cache assíncrono quando Supabase estiver ativo.
+
+Passo 11 - CRUD do admin com integração Supabase.
+Resultado: categorias e produtos do painel agora tentam gravar e sincronizar com Supabase, mantendo fallback local para continuar testando sem bloqueio.
+
+Passo 12 - Fluxo de fotos iniciado.
+Resultado: cardápio agora mostra placeholder quando não há imagem, e o admin ganhou upload de foto com suporte a Supabase Storage e fallback local para testes.
+
+Passo 13 - Validação de pedido com dados do cliente.
+Resultado: checkout agora pede nome e telefone com validação simples, e esses dados aparecem no WhatsApp, ticket térmico e painel admin.
+
+Passo 14 - Revisão técnica focada em persistência de pedidos.
+Resultado: corrigido envio de pedidos para Supabase com ID compatível (UUID), eliminando falha silenciosa causada por formato de ID inválido e mantendo fallback local ativo; também ajustado o painel admin para atualizar métricas corretamente mesmo quando filtros retornam lista vazia.
+
+Passo 15 - Atualização em tempo real dos pedidos no painel ADM.
+Resultado: admin agora assina mudanças de pedidos via Supabase Realtime para atualizar a lista automaticamente; quando não houver realtime disponível, o sistema mantém fallback por polling periódico sem quebrar.
+
+Passo 16 - Atualização em tempo real do cardápio para clientes.
+Resultado: página do cardápio agora assina mudanças de categorias/produtos via Supabase Realtime e recarrega automaticamente o menu em telas já abertas; também foi adicionada rotina de polling como fallback e ajuste de prioridade para buscar Supabase antes do catálogo local quando houver conexão.
+
+Passo 17 - Revisão técnica de estabilidade em atualizações do cardápio.
+Resultado: corrigido risco de recarregamentos concorrentes e eventos em cascata no cardápio em tempo real, com fila de hidratação, debounce dos eventos do Realtime e limpeza completa de timers ao encerrar a página.
+
+Passo 18 - Alerta operacional de novos pedidos no ADM.
+Resultado: painel administrativo agora destaca novos pedidos com aviso visual pulsante e tentativa de alerta sonoro leve, mantendo fallback visual caso o navegador bloqueie áudio automático.
+
+Passo 19 - Preparação de go-live e deploy sem backend próprio.
+Resultado: criada configuração central de runtime para chave/URL do Supabase, adicionado script SQL de bucket/policies de imagens e documentado checklist completo de publicação e validação final em produção.
+
+Passo 20 - Hardening de RLS para produção.
+Resultado: criado script incremental para restringir policies de leitura/escrita ao restaurante greencamp, remover leitura pública de pedidos e limitar operações administrativas a usuários autenticados no contexto correto.
+
+Passo 21 - Smoke test final de pré-deploy.
+Resultado: criado script de checagem rápida por terminal e guia de validação funcional enxuto, permitindo confirmar integridade técnica e fluxo operacional antes de publicar novas versões.
+
+Passo 22 - Padronização de release operacional.
+Resultado: criado template de release com risco/rollback/validação e iniciado registro de release notes da versão atual, conectando o processo ao checklist oficial de deploy.
+
+Passo 23 - Fechamento operacional e semáforo de deploy.
+Resultado: criado status objetivo de prontidão para deploy (com gatilho de publicação) e handoff de operação para a primeira semana, garantindo decisão de publicação baseada em checklist verificável.
+
