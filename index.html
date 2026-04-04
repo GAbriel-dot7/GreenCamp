@@ -1767,7 +1767,11 @@ function setupScrollSpy() {
   updateActive();
 }
 
-window.GreenCampMenuCatalogStore.seedIfEmpty(CATEGORIES, PRODUCTS);
+try {
+  window.GreenCampMenuCatalogStore.seedIfEmpty(CATEGORIES, PRODUCTS);
+} catch {
+  // Continue with static runtime if browser storage is unavailable.
+}
 
 window.addEventListener('greencamp:catalog-updated', () => {
   const catalog = window.GreenCampMenuCatalogStore.getCatalog();

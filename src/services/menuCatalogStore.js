@@ -23,7 +23,11 @@
   }
 
   function readCatalog() {
-    return safeParseJson(localStorage.getItem(STORAGE_KEY), getEmptyCatalog());
+    try {
+      return safeParseJson(localStorage.getItem(STORAGE_KEY), getEmptyCatalog());
+    } catch {
+      return getEmptyCatalog();
+    }
   }
 
   function writeCatalog(catalog) {
@@ -31,7 +35,13 @@
       categories: Array.isArray(catalog.categories) ? catalog.categories : [],
       products: Array.isArray(catalog.products) ? catalog.products : [],
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCatalog));
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCatalog));
+    } catch {
+      // Keep runtime functional even when storage is blocked/quota exceeded.
+    }
+
     window.dispatchEvent(new CustomEvent('greencamp:catalog-updated', { detail: nextCatalog }));
     return nextCatalog;
   }

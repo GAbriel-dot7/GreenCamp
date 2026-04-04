@@ -19,7 +19,13 @@
       return null;
     }
 
-    const catalog = window.GreenCampMenuCatalogStore.getCatalog();
+    let catalog = null;
+    try {
+      catalog = window.GreenCampMenuCatalogStore.getCatalog();
+    } catch {
+      return null;
+    }
+
     if (!catalog || !Array.isArray(catalog.categories) || !Array.isArray(catalog.products)) {
       return null;
     }
