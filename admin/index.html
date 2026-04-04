@@ -633,7 +633,8 @@
           ? 'Login local ativo. Conecte o Supabase para usar autenticação real.'
           : 'Login realizado com sucesso.';
         renderAuthState();
-        refreshCurrentTab();
+        await refreshCurrentTab();
+        setupOrdersLiveUpdates();
       } catch (error) {
         document.getElementById('authHint').textContent = error.message || 'Não foi possível entrar.';
       }
@@ -641,6 +642,14 @@
 
     async function handleLogout() {
       await window.GreenCampAdminAuth.signOut();
+      if (typeof ordersRealtimeUnsubscribe === 'function') {
+        ordersRealtimeUnsubscribe();
+        ordersRealtimeUnsubscribe = null;
+      }
+      if (ordersPollHandle) {
+        clearInterval(ordersPollHandle);
+        ordersPollHandle = null;
+      }
       renderAuthState();
     }
 
@@ -1125,6 +1134,10 @@
     }
 
     function setupOrdersLiveUpdates() {
+      if (!window.GreenCampAdminAuth.isAuthenticated()) {
+        return;
+      }
+
       if (typeof ordersRealtimeUnsubscribe === 'function') {
         ordersRealtimeUnsubscribe();
         ordersRealtimeUnsubscribe = null;
@@ -1183,8 +1196,10 @@
       } finally {
         renderOrders();
         renderCatalog();
-        setupOrdersLiveUpdates();
         setupOrdersForegroundSync();
+        if (window.GreenCampAdminAuth.isAuthenticated()) {
+          setupOrdersLiveUpdates();
+        }
       }
     })();
 
