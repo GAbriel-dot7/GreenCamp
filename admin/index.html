@@ -590,6 +590,7 @@
     let pendingNewOrdersCount = 0;
     let newOrderAlertTimeout = null;
     let ordersRefreshInFlight = false;
+    const ORDERS_SYNC_INTERVAL_MS = 2000;
 
     function renderAuthState() {
       const session = window.GreenCampAdminAuth.readSession();
@@ -1145,8 +1146,20 @@
         }
       }
 
-      ordersPollHandle = setInterval(syncOrdersSilently, 5000);
+      ordersPollHandle = setInterval(syncOrdersSilently, ORDERS_SYNC_INTERVAL_MS);
       syncOrdersSilently();
+    }
+
+    function setupOrdersForegroundSync() {
+      window.addEventListener('focus', () => {
+        syncOrdersSilently();
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          syncOrdersSilently();
+        }
+      });
     }
 
     function refreshCurrentTab() {
@@ -1166,6 +1179,7 @@
       renderOrders();
       renderCatalog();
       setupOrdersLiveUpdates();
+      setupOrdersForegroundSync();
     });
 
     window.addEventListener('beforeunload', () => {
