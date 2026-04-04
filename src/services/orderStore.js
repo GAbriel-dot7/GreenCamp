@@ -162,6 +162,31 @@
     return Array.isArray(data) ? data : (Array.isArray(window.__greencampOrdersCache) ? window.__greencampOrdersCache : []);
   }
 
+  async function clearAllOrders() {
+    const supabase = getSupabaseClient();
+
+    if (supabase) {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('restaurant_id', RESTAURANT_ID);
+
+      if (!error) {
+        window.__greencampOrdersCache = [];
+      }
+    }
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage failures so the admin remains usable.
+    }
+
+    window.__greencampOrdersCache = [];
+    window.__greencampOrdersLoading = false;
+    return [];
+  }
+
   function subscribeOrders(onChange) {
     const supabase = getSupabaseClient();
     if (!supabase || typeof onChange !== 'function') {
@@ -222,6 +247,7 @@
     persistOrder,
     listOrders,
     refreshOrders,
+    clearAllOrders,
     subscribeOrders,
     updateOrderStatus,
   };

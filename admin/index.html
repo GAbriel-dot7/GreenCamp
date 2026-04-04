@@ -132,6 +132,17 @@
     font-weight: 700;
   }
 
+  .btn.danger {
+    background: rgba(192,57,43,0.14);
+    border-color: rgba(192,57,43,0.45);
+    color: #ffb7b0;
+  }
+
+  .btn.danger:hover {
+    color: #ffd4d0;
+    border-color: rgba(192,57,43,0.8);
+  }
+
   .btn:hover,
   .pill:hover { transform: translateY(-1px); }
 
@@ -465,6 +476,7 @@
       <div class="topbar-actions">
         <div class="new-order-alert" id="newOrderAlert">Novo pedido chegou</div>
         <button class="btn primary" onclick="refreshCurrentTab()">Atualizar</button>
+        <button class="btn danger" onclick="clearAllOrders()">Zerar pedidos</button>
       </div>
     </div>
 
@@ -1073,6 +1085,24 @@
 
     function refreshOrders() {
       renderOrders();
+    }
+
+    async function clearAllOrders() {
+      const firstConfirm = confirm('Isso vai apagar todos os pedidos. Continuar?');
+      if (!firstConfirm) return;
+
+      const secondConfirm = confirm('Confirma mesmo? Esta ação não pode ser desfeita.');
+      if (!secondConfirm) return;
+
+      await window.GreenCampOrderStore.clearAllOrders();
+      currentOrderId = null;
+      pendingNewOrdersCount = 0;
+      knownOrderIds = new Set();
+      ordersBootstrapped = false;
+      updateNewOrderAlertLabel();
+      renderOrders();
+      document.getElementById('printerText').value = '';
+      alert('Pedidos zerados com sucesso.');
     }
 
     function setupOrdersLiveUpdates() {
