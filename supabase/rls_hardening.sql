@@ -50,7 +50,16 @@ using (
 );
 
 -- 2) Restrict public order insert and remove public order listing.
+
+-- Keep read access public for the greencamp admin dashboard, so orders
+-- appear across devices/browsers even when the admin is not using Supabase Auth.
 drop policy if exists "public read own restaurant orders" on orders;
+create policy "public read own restaurant orders"
+on orders
+for select
+using (
+  restaurant_id = 'greencamp'
+);
 
 drop policy if exists "public insert orders" on orders;
 create policy "public insert orders"
