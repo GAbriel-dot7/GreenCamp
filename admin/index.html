@@ -589,6 +589,7 @@
     let ordersBootstrapped = false;
     let pendingNewOrdersCount = 0;
     let newOrderAlertTimeout = null;
+    let ordersRefreshInFlight = false;
 
     function renderAuthState() {
       const session = window.GreenCampAdminAuth.readSession();
@@ -1087,6 +1088,23 @@
       renderOrders();
     }
 
+    async function syncOrdersSilently() {
+      if (ordersRefreshInFlight) return;
+      ordersRefreshInFlight = true;
+
+      try {
+        await window.GreenCampOrderStore.refreshOrders();
+        if (currentTab === 'orders') {
+          const previousLoadingState = window.__greencampOrdersLoading;
+          window.__greencampOrdersLoading = true;
+          renderOrders();
+          window.__greencampOrdersLoading = previousLoadingState;
+        }
+      } finally {
+        ordersRefreshInFlight = false;
+      }
+    }
+
     async function clearAllOrders() {
       const firstConfirm = confirm('Isso vai apagar todos os pedidos. Continuar?');
       if (!firstConfirm) return;
@@ -1120,23 +1138,15 @@
       const canSubscribe = store && typeof store.subscribeOrders === 'function';
 
       if (canSubscribe) {
-        const unsubscribe = store.subscribeOrders(() => {
-          if (currentTab === 'orders') {
-            renderOrders();
-          }
-        });
+        const unsubscribe = store.subscribeOrders(syncOrdersSilently);
 
         if (typeof unsubscribe === 'function') {
           ordersRealtimeUnsubscribe = unsubscribe;
-          return;
         }
       }
 
-      ordersPollHandle = setInterval(() => {
-        if (currentTab === 'orders') {
-          renderOrders();
-        }
-      }, 5000);
+      ordersPollHandle = setInterval(syncOrdersSilently, 5000);
+      syncOrdersSilently();
     }
 
     function refreshCurrentTab() {
