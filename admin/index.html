@@ -1086,7 +1086,7 @@
     }
 
     function refreshOrders() {
-      renderOrders();
+      syncOrdersSilently();
     }
 
     async function syncOrdersSilently() {
@@ -1162,9 +1162,9 @@
       });
     }
 
-    function refreshCurrentTab() {
+    async function refreshCurrentTab() {
       if (currentTab === 'orders') {
-        renderOrders();
+        await syncOrdersSilently();
       } else {
         renderCatalog();
       }
@@ -1175,12 +1175,18 @@
     }
 
     renderAuthState();
-    syncCatalogSource().then(() => {
-      renderOrders();
-      renderCatalog();
-      setupOrdersLiveUpdates();
-      setupOrdersForegroundSync();
-    });
+    (async () => {
+      try {
+        await syncCatalogSource();
+      } catch (error) {
+        console.warn('Falha ao sincronizar catálogo no init do admin.', error);
+      } finally {
+        renderOrders();
+        renderCatalog();
+        setupOrdersLiveUpdates();
+        setupOrdersForegroundSync();
+      }
+    })();
 
     window.addEventListener('beforeunload', () => {
       if (typeof ordersRealtimeUnsubscribe === 'function') {
