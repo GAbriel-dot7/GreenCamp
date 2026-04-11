@@ -590,6 +590,10 @@
     let pendingNewOrdersCount = 0;
     let newOrderAlertTimeout = null;
     let ordersRefreshInFlight = false;
+    let ordersRefreshPromise = null;
+    let syncAttemptCount = 0;
+    let lastSuccessfulSyncAt = null;
+    let catalogRefreshInFlight = false;
     const ORDERS_SYNC_INTERVAL_MS = 2000;
 
     function renderAuthState() {
@@ -1095,24 +1099,45 @@
     }
 
     function refreshOrders() {
-      syncOrdersSilently();
+      return syncOrdersSilently();
     }
 
     async function syncOrdersSilently() {
-      if (ordersRefreshInFlight) return;
-      ordersRefreshInFlight = true;
-
-      try {
-        await window.GreenCampOrderStore.refreshOrders();
-        if (currentTab === 'orders') {
-          const previousLoadingState = window.__greencampOrdersLoading;
-          window.__greencampOrdersLoading = true;
-          renderOrders();
-          window.__greencampOrdersLoading = previousLoadingState;
-        }
-      } finally {
-        ordersRefreshInFlight = false;
+      if (ordersRefreshInFlight) {
+        console.info('[GreenCamp] syncOrdersSilently: already in flight, coalescing call');
+        return ordersRefreshPromise;
       }
+      ordersRefreshInFlight = true;
+      syncAttemptCount += 1;
+      const attemptId = syncAttemptCount;
+      console.info(`[GreenCamp] syncOrdersSilently: start (attempt #${attemptId})`);
+
+      ordersRefreshPromise = (async () => {
+        try {
+          await window.GreenCampOrderStore.refreshOrders();
+          lastSuccessfulSyncAt = Date.now();
+          console.info(`[GreenCamp] syncOrdersSilently: success (attempt #${attemptId}, lastSync=${new Date(lastSuccessfulSyncAt).toISOString()})`);
+          if (currentTab === 'orders') {
+            const previousLoadingState = window.__greencampOrdersLoading;
+            window.__greencampOrdersLoading = true;
+            try {
+              renderOrders();
+            } catch (renderErr) {
+              console.error(`[GreenCamp] syncOrdersSilently: renderOrders failed (attempt #${attemptId})`, renderErr);
+            } finally {
+              window.__greencampOrdersLoading = previousLoadingState;
+            }
+          }
+        } catch (err) {
+          const elapsed = lastSuccessfulSyncAt ? `${((Date.now() - lastSuccessfulSyncAt) / 1000).toFixed(1)}s ago` : 'never';
+          console.error(`[GreenCamp] syncOrdersSilently: failed (attempt #${attemptId}, lastSuccess=${elapsed})`, err);
+        } finally {
+          ordersRefreshInFlight = false;
+          ordersRefreshPromise = null;
+        }
+      })();
+
+      return ordersRefreshPromise;
     }
 
     async function clearAllOrders() {
@@ -1179,7 +1204,19 @@
       if (currentTab === 'orders') {
         await syncOrdersSilently();
       } else {
-        renderCatalog();
+        if (catalogRefreshInFlight) {
+          console.info('[GreenCamp] refreshCurrentTab: catalog refresh already in flight, skipping');
+          return;
+        }
+        catalogRefreshInFlight = true;
+        try {
+          await syncCatalogSource();
+          renderCatalog();
+        } catch (err) {
+          console.error('[GreenCamp] refreshCurrentTab: catalog refresh failed', err);
+        } finally {
+          catalogRefreshInFlight = false;
+        }
       }
     }
 
